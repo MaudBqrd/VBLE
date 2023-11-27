@@ -1,0 +1,53 @@
+{
+    # --------- GENERAL PARAMETERS ---------
+
+    "dataset_root": "data/",  # path to data folder
+    "dataset": "set47_bsd",  # dataset name
+
+    "algorithm": "vble",  # vble or mapz (deterministic algorithm)
+    "experiment_name": "demo_exp",  # experiment name
+
+    "cuda": true,  # true to use GPUs
+    "verbose": true,
+    "n_samples": 3,  # number of images to restore. -1 to restore all dataset images
+
+    # --------- INVERSE PROBLEM SETTINGS ---------
+
+    "problem": "inpainting",  # deblur, sisr, inpainting or denoising
+    "sigma": 0,  # std of a white Gaussian noise for the inverse problems in [0,255]
+
+    # deblurring parameters
+    "kernel": null, # access to a blur kernel .npy format
+    "kernel_std": null,  # Gaussian noise std, overwritten by kernel if kernel is not None
+    "kernel_size": null,  # Size of the Gaussian kernel, overwritten by kernel if kernel is not None
+
+    # single image super resolution paramters
+    "scale_factor": null,  # scale factor for SISR
+
+    # inpainting pameters
+    "mask": "filters/inpainting50.npy",  # access to an inpainting mask .npy format
+    "proba_missing": null,  # missing pixels probability, overwritten by mask if mask is not None
+
+    # --------- MODEL LOADING ---------
+
+    "model": "model_zoo/cheng_0.1800_bsd.pth.tar",  # path to model checkpoint
+    "model_type": "cheng",  # CAE models: 'mbt', 'cheng'. VAE models: '1lvae-vanilla',
+                          # '1lvae-fixedvar', '1lvae-uniform'
+
+    # --------- REGULARIZATION PARAMETERS ---------
+
+    "lamb": 20.4,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
+    "save_all_estimates": true,  # True to save all estimates for VBLE algo (in particular, z and a to do additional posterior sampling)
+
+    # --------- OPTIMIZATION PARAMETERS ---------
+
+    "lr": 0.1,  # learning rate
+    "max_iters": 1000,  # number of iterations
+    "optimizer_name": "adam",  # adam or sgd
+    "seed": 1,  # -1 for random seed
+    "clip_grad_norm": 20,  # clipping value in gradient descent. For adam optimizer, 20 is advised.
+    "gd_final_value": "last100",  # last/last100/min. last: z final is the last z of gradient descent. last100: z final is an average
+#                    of the last 100 iterations. min: z final corresponds to the z with the minimum loss during the
+#                    iterations
+    "optimize_h": false,  # true to optimize on (z,h), false to optimize on z only (VBLE configuration)
+}

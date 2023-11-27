@@ -2,7 +2,7 @@
 
 This repo contains the code associated with the paper "Variational Bayes Image Restoration with compressive autoencoders".
 
-It provides the implementation of Variational Bayes Latent Estimation (VBLE) algorithm in PyTorch for image restoration, using compressive autoencoders. **Note that it does not allow to reproduce the paper results, as the finetuned models are not provided yet.** However, pretrained compressed models on natural images from [CompressAI](https://github.com/InterDigitalInc/CompressAI)  can be downloaded, enabling to obtain decent results on BSD dataset.
+It provides the implementation of Variational Bayes Latent Estimation (VBLE) algorithm in PyTorch for image restoration, using compressive autoencoders. Note that it does not allow to reproduce the paper results, as the finetuned models are not provided yet. However, pretrained compressed models on natural images from [CompressAI](https://github.com/InterDigitalInc/CompressAI)  can be downloaded, enabling to obtain very decent results on BSD dataset.
 
 Supported inverse problems: deblurring, SISR, inpainting. 
 
@@ -15,7 +15,6 @@ Developed under Python=3.9, PyTorch=1.11.0.
 ```bash
 cd VBLE/
 pip install -r requirements.txt  # environment setup
-gunzip model_zoo/*.pth.tar.gz  # decompress nn models
 ```
 
 ## Model download
@@ -32,9 +31,9 @@ SAVE_PATH="model_zoo/mbt_q3_compressai.pth.tar"
 python get_pretrained_models_compressai.py --model_type $MODEL_TYPE --quality $QUALITY --save_path $SAVE_PATH
 ```
 
-| **Quality**                 | **1**  | **2**  | **3**  | **4** | **5** | **6**  | **7 ** | **8**  |
-| --------------------------- | ------ | ------ | ------ | ----- | ----- | ------ | ------ | ------ |
-| Bitrate parameters $\alpha$ | 0.0018 | 0.0035 | 0.0067 | 0.013 | 0.025 | 0.0483 | 0.932  | 0.1800 |
+| **Quality**                 | **1**  | **2**  | **3**  | **4** | **5** | **6**  | **7** | **8**  |
+| --------------------------- | ------ | ------ | ------ | ----- | ----- | ------ | ----- | ------ |
+| Bitrate parameters $\alpha$ | 0.0018 | 0.0035 | 0.0067 | 0.013 | 0.025 | 0.0483 | 0.932 | 0.1800 |
 
 See [CompressAI doc](https://interdigitalinc.github.io/CompressAI/zoo.html) for further information on these pretrained models. To choose the appropriate for each inverse problem, refer to "Hyperparameters values for each inverse problem" section of this readME.
 
@@ -77,7 +76,7 @@ python main.py --problem deblur --algorithm vble --experiment_name demo_exp --si
 |  mbt  | $\alpha$  |          0.0932          |        0.0067         | 0.0483 |          0.013           |        0.0035         | 0.0067 |   0.0483   |   0.013    |       0.0932        |
 |       | $\lambda$ |           8.9            |          7.8          |  8.1   |           82.9           |         73.6          |  64.8  |    1.1     |    0.62    |         6.2         |
 
-## Additional features
+## Additional features
 
 - Possibility to choose the map-z (```--algorithm mapz``` option) algorithm, that is the deterministic counterpart of VBLE.
 - vae inner package, to train different vaes (see vae/README.md) and test them for toy datasets (MNIST, CelebA) using VBLE algorithm.

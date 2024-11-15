@@ -1,14 +1,18 @@
 {
     # --------- GENERAL PARAMETERS ---------
 
-    "dataset_root": "data/",  # path to data folder
-    "dataset": "set47_bsd",  # dataset name
-
-    "algorithm": "vble",  # vble or mapz (deterministic algorithm)
     "experiment_name": "demo_exp",  # experiment name
-
-    "cuda": true,  # true to use GPUs
+    "latent_inference_model": "uniform",
+    "cuda": true,  
+    "seed": 1,  # -1 for random seed
     "verbose": true,
+    
+    # --------- DATA SETTINGS ---------
+
+    "target_image_root": "data/set47_bsd",  # path to data folder
+    "degraded_image_root": null,
+
+    "n_bits": 8,
     "n_samples": 3,  # number of images to restore. -1 to restore all dataset images
 
     # --------- INVERSE PROBLEM SETTINGS ---------
@@ -30,24 +34,20 @@
 
     # --------- MODEL LOADING ---------
 
-    "model": "model_zoo/mbt_0.0067_bsd.pth.tar",  # path to model checkpoint
-    "model_type": "mbt",  # CAE models: 'mbt', 'cheng'. VAE models: '1lvae-vanilla',
-                          # '1lvae-fixedvar', '1lvae-uniform'
+    "model": null,  # path to model checkpoint
+    "model_type": null,  # CAE models: 'mbt', 'cheng'
 
     # --------- REGULARIZATION PARAMETERS ---------
 
-    "lamb": 71,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
+    "lamb": 0.6,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
     "save_all_estimates": true,  # True to save all estimates for VBLE algo (in particular, z and a to do additional posterior sampling)
 
     # --------- OPTIMIZATION PARAMETERS ---------
 
     "lr": 0.1,  # learning rate
-    "max_iters": 1000,  # number of iterations
+    "max_iters": 200,  # number of iterations
+    "datafit_loss_type": "ll",
     "optimizer_name": "adam",  # adam or sgd
-    "seed": 1,  # -1 for random seed
-    "clip_grad_norm": 20,  # clipping value in gradient descent. For adam optimizer, 20 is advised.
-    "gd_final_value": "last100",  # last/last100/min. last: z final is the last z of gradient descent. last100: z final is an average
-#                    of the last 100 iterations. min: z final corresponds to the z with the minimum loss during the
-#                    iterations. last100 recommended for vble, last for mapz.
-    "optimize_h": false,  # true to optimize on (z,h), false to optimize on z only (VBLE configuration)
+    "n_samples_sgvb": 1,  # Number of samples for computing the SGVB estimate at each iteration. If instability during VBLE optimization, increase this number
+    "posterior_sampling_batch_size": 4,  # batch size for posterior sampling
 }

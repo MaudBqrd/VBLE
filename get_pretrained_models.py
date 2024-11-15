@@ -27,38 +27,46 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
+from torch.hub import load_state_dict_from_url
+import argparse
+import torch
 
-from typing import Dict
+from compressai.zoo import load_pretrained
 
-from torch import Tensor
+root_url = "https://nextcloud.isae.fr/index.php/s/"
+model_urls = {
+    "mbt": {
+        "mse": {
+            "0.0035": f"{root_url}/3qkx8YpcS87z5QW/download/mbt_0.0035_bsd.pth.tar",
+            "0.013": f"{root_url}/extEnwSdd5gLNRA/download/mbt_0.013_bsd.pth.tar",
+            "0.0483": f"{root_url}/KCCaBoNjGcqKSsF/download/mbt_0.0483_bsd.pth.tar",
+            "0.1800": f"{root_url}/eFxMeJZ6Az5T9B9/download/mbt_0.1800_bsd.pth.tar",
+        },
+    },
+    "cheng": {
+        "mse": {
+            "0.0035": f"{root_url}/GXxykHwX4keGYWs/download/cheng_0.0035_bsd.pth.tar",
+            "0.013": f"{root_url}/iAwLZwCdSrBCEtA/download/cheng_0.013_bsd.pth.tar",
+            "0.0483": f"{root_url}/LwsSyyBCRHc74Mg/download/cheng_0.0483_bsd.pth.tar",
+            "0.1800": f"{root_url}/pSM8LdS2bksfFG9/download/cheng_0.1800_bsd.pth.tar",
+        },
+    },
+}
 
+parser = argparse.ArgumentParser()
 
-def rename_key(key: str) -> str:
-    """Rename state_dict key."""
+parser.add_argument('--model_type', type=str, choices=["mbt", "cheng"], help="model type")
+parser.add_argument('--bitrate', type=float, help="Determines the model bitrate. Choices are 0.0035, 0.013, 0.0483, 0.1800")
+parser.add_argument('--save_path', type=str, default="model_zoo/", help="path to save the checkpoint")
 
-    # Deal with modules trained with DataParallel
-    if key.startswith("module."):
-        key = key[7:]
+args = parser.parse_args()
 
-    # ResidualBlockWithStride: 'downsample' -> 'skip'
-    if ".downsample." in key:
-        return key.replace("downsample", "skip")
+url = model_urls[args.model_type]["mse"][args.quality]
+state_dict = load_state_dict_from_url(url, progress=True)
+state_dict = load_pretrained(state_dict)
 
-    # EntropyBottleneck: nn.ParameterList to nn.Parameters
-    if key.startswith("entropy_bottleneck."):
-        if key.startswith("entropy_bottleneck._biases."):
-            return f"entropy_bottleneck._bias{key[-1]}"
+if not os.path.exists(os.path.dirname(args.save_path)):
+    os.makedirs(args.save_path)
 
-        if key.startswith("entropy_bottleneck._matrices."):
-            return f"entropy_bottleneck._matrix{key[-1]}"
-
-        if key.startswith("entropy_bottleneck._factors."):
-            return f"entropy_bottleneck._factor{key[-1]}"
-
-    return key
-
-
-def load_pretrained(state_dict: Dict[str, Tensor]) -> Dict[str, Tensor]:
-    """Convert state_dict keys."""
-    state_dict = {rename_key(k): v for k, v in state_dict.items()}
-    return state_dict
+torch.save({"state_dict": state_dict}, args.save_path)

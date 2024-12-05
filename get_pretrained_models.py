@@ -32,8 +32,6 @@ from torch.hub import load_state_dict_from_url
 import argparse
 import torch
 
-from compressai.zoo import load_pretrained
-
 root_url = "https://nextcloud.isae.fr/index.php/s/"
 model_urls = {
     "mbt": {
@@ -67,16 +65,17 @@ model_urls = {
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1mvae-vanilla-resnet"], help="model type")
-parser.add_argument('--bitrate', type=float, help="Determines the model bitrate. Choices are 0.0035, 0.013, 0.0483, 0.1800")
+parser.add_argument('--bitrate', type=str, help="Determines the model bitrate. Choices are 0.0035, 0.013, 0.0483, 0.1800")
 parser.add_argument('--save_path', type=str, default="model_zoo/", help="path to save the checkpoint")
 
 args = parser.parse_args()
 
-url = model_urls[args.model_type]["mse"][args.quality]
+if "1lvae" in args.model_type:
+    url = model_urls[args.model_type]["variable"]
+else:
+    url = model_urls[args.model_type]["mse"][args.bitrate]
 state_dict = load_state_dict_from_url(url, progress=True)
-state_dict = load_pretrained(state_dict)
 
 if not os.path.exists(os.path.dirname(args.save_path)):
-    os.makedirs(args.save_path)
-
-torch.save({"state_dict": state_dict}, args.save_path)
+    os.makedirs(os.path.dirname(args.save_path))
+torch.save(state_dict, args.save_path)

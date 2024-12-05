@@ -103,7 +103,7 @@ This repo also enables to train and test VBLE with simple VAEs on simple dataset
 MODEL_TYPE="1lvae-vanilla"  # 1lvae-vanilla (light VAE) or 1lvae-vanilla-resnet (heavier resnet VAE)
 SAVE_PATH="model_zoo/${MODEL_TYPE}_celeba_gammavar.pth.tar"
 
-python get_pretrained_models.py --model_type $MODEL_TYPE --bitrate $BITRATE --save_path $SAVE_PATH
+python get_pretrained_models.py --model_type $MODEL_TYPE --save_path $SAVE_PATH
 ```
 
 To launch a deblurring experiments with this VAE on CelebA:

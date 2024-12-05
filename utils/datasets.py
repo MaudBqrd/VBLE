@@ -77,7 +77,7 @@ class ImageDataset(Dataset):
         return img
 
 
-def load_dataset(target_image_root: str, degraded_image_root: str = None, scale_factor: int = 1, patch_size: int = None, n_bits: int = 8):
+def load_dataset(target_image_root: str, degraded_image_root: str = None, scale_factor: int = 1, patch_size: int = None, n_bits: int = 8, dataset_name: str = None):
     """
     Args:
     target_image_root: path to target images, if given
@@ -87,9 +87,17 @@ def load_dataset(target_image_root: str, degraded_image_root: str = None, scale_
     patch_size: if given, center crop the input images to the given patch size
     n_bits: number of bits the images are coded on. For normalization purposes
     """
-        
+    if scale_factor is None:
+        scale_factor = 1
     transform_list = [transforms.ToTensor()]
     transform_list_y = [transforms.ToTensor()]
+    if dataset_name is not None:
+        if dataset_name == "mnist":
+            transform_list += [transforms.Pad(2)]
+            transform_list_y += [transforms.Pad(2)]
+        elif dataset_name == "celeba":
+            transform_list += [transforms.CenterCrop(128), transforms.Resize(64)]
+            transform_list_y += [transforms.CenterCrop(128), transforms.Resize(64 // scale_factor)]
     if patch_size is not None:
         transform_list += [transforms.CenterCrop(patch_size)]
         transform_list_y += [transforms.CenterCrop(patch_size // scale_factor)]     

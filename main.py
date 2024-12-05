@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 
 # General parameters
 parser.add_argument('--experiment_name', type=str, help='experiment name')
-parser.add_argument('--latent_inference_model', type=str, default='uniform', help='uniform, gaussian, or dirac. Type of latent parametric distribution of VBLE. "dirac" corresponds to MAP-z approach. "uniform" is recommended for VBLE with CAEs')
+parser.add_argument('--latent_inference_model', type=str, default='uniform', help='uniform, gaussian, or dirac. Type of latent parametric distribution of VBLE. "dirac" corresponds to MAP-z approach. "uniform" is recommended for VBLE with CAEs, while "gaussian" is recommended for VBLE with VAEs')
 
 parser.add_argument('--config', type=str, default='none', help="path to a yml file to overwrite this parser")
 parser.add_argument('--cuda', action='store_true', default=False)
@@ -29,6 +29,7 @@ parser.add_argument('--verbose', action='store_true', default=False)
 # Data loading parameters
 parser.add_argument('--target_image_root', type=str, help="path to target images (either target or degraded image root shall be specified)", default=None)
 parser.add_argument('--degraded_image_root', type=str, help="path to degraded images (either target or degraded image root shall be specified)", default=None)
+parser.add_argument('--dataset_name', type=str, default=None, help="dataset name for specific preprocessing (implemented: mnist, celeba)")
 parser.add_argument('--n_samples', type=int, default=-1, help="number of images to restore. -1 to restore all dataset images")
 
 parser.add_argument('--patch_size', type=int, default=None, help="if specified, center crop the original images to the specified patch size")
@@ -48,7 +49,7 @@ parser.add_argument('--proba_missing', type=float, default=0.5)
 
 # Model settings
 parser.add_argument('--model', type=str, help="path to model checkpoint")
-parser.add_argument('--model_type', type=str, choices=["mbt", "cheng"], help="model type")
+parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1lvae-vanilla-fcb"], help="model type")
 
 # Optimization parameters
 parser.add_argument('--lamb', type=float, default=1, help="Regularization parameter. Lambda=1 correpsonds to the Bayesian framework")
@@ -67,8 +68,8 @@ else:
     dico_params = vars(args)
     with open(args.config, 'r') as f:
         dico_params_config = yaml.safe_load(f)
-    for k in ['target_image_root', 'degraded_image_root', 'model', 'model_type', 'experiment_name']:
-        if k in dico_params:
+    for k in ['target_image_root', 'degraded_image_root', 'model', 'model_type', 'experiment_name', 'dataset_name']:
+        if k in dico_params and dico_params[k] is not None:
             dico_params_config[k] = dico_params[k]
     dico_params.update(dico_params_config)
 
@@ -82,7 +83,7 @@ device = 'cuda' if dico_params['cuda'] else 'cpu'
 # Load images (from test dataset)
 n_bits = dico_params["n_bits"]
 n_pixel_values = 2**n_bits - 1
-test_dataset = load_dataset(dico_params["target_image_root"], dico_params["degraded_image_root"], dico_params["scale_factor"], dico_params["patch_size"], n_bits)
+test_dataset = load_dataset(dico_params["target_image_root"], dico_params["degraded_image_root"], dico_params["scale_factor"], dico_params["patch_size"], n_bits, dico_params["dataset_name"])
 
 if dico_params["n_samples"] == -1:
     dico_params["n_samples"] = len(test_dataset)
@@ -161,7 +162,9 @@ for ind in range(min(dico_params['n_samples'], len(test_dataset))):
         out_encoder = priornet.net_encoder(xinit)
         out_xinit = priornet.net_decoder(out_encoder)
         out_xinit.update(out_encoder)
-        zinit = [out_xinit["z"], out_xinit["h"]]
+        zinit = [out_xinit["z"]]
+        if "h" in out_xinit:
+            zinit += [out_xinit["h"]]
 
     # VBLE algorithm
     out_dict = vble(
@@ -209,7 +212,8 @@ for ind in range(min(dico_params['n_samples'], len(test_dataset))):
     if x_target is not None:
         save_as_png(x_target, 'xopt', f'{ind}_xtarget', exp_folder)
     for estim in estimates:
-        save_as_png(estimates[estim], 'xopt', f'{ind}_xopt_{estim.split("x_")[-1]}', exp_folder)
+        if "std" not in estim:
+            save_as_png(estimates[estim], 'xopt', f'{ind}_xopt_{estim.split("x_")[-1]}', exp_folder)
     if 'x_xmmse_std' in estimate_name_to_save:
         xopt_std_normalized = get_normalized_std(estimates["x_xmmse_std"], n_channels)
         save_as_png(xopt_std_normalized, 'xopt', f'{ind}_xopt_std_norm', exp_folder)

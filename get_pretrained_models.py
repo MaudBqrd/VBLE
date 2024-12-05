@@ -39,24 +39,34 @@ model_urls = {
     "mbt": {
         "mse": {
             "0.0035": f"{root_url}/3qkx8YpcS87z5QW/download/mbt_0.0035_bsd.pth.tar",
+            "0.0067": f"{root_url}/WNb8cbMQRtD8j72/download/mbt_0.0067_bsd.pth.tar",
             "0.013": f"{root_url}/extEnwSdd5gLNRA/download/mbt_0.013_bsd.pth.tar",
+            "0.025": f"{root_url}/eGQ7mkS3AEcQKY2/download/mbt_0.025_bsd.pth.tar",
             "0.0483": f"{root_url}/KCCaBoNjGcqKSsF/download/mbt_0.0483_bsd.pth.tar",
-            "0.1800": f"{root_url}/eFxMeJZ6Az5T9B9/download/mbt_0.1800_bsd.pth.tar",
+            "0.0932": f"{root_url}/SqgTDNM4M7qkN84/download/mbt_0.0932_bsd.pth.tar",
         },
     },
     "cheng": {
         "mse": {
             "0.0035": f"{root_url}/GXxykHwX4keGYWs/download/cheng_0.0035_bsd.pth.tar",
+            "0.0067": f"{root_url}/HEbLQ9oaqw5NGWw/download/cheng_0.0067_bsd.pth.tar",
             "0.013": f"{root_url}/iAwLZwCdSrBCEtA/download/cheng_0.013_bsd.pth.tar",
+            "0.025": f"{root_url}/bwmoNZrmNTbNFBY/download/cheng_0.025_bsd.pth.tar",
             "0.0483": f"{root_url}/LwsSyyBCRHc74Mg/download/cheng_0.0483_bsd.pth.tar",
-            "0.1800": f"{root_url}/pSM8LdS2bksfFG9/download/cheng_0.1800_bsd.pth.tar",
+            "0.0932": f"{root_url}/CfK8TqD4ZNHx87i/download/cheng_0.0932_bsd.pth.tar",
         },
     },
+    "1lvae-vanilla": {
+        "variable": f"{root_url}/q2T4BMwCGzR34yj/download/1lvae-vanilla_celeba_gammavariable.pth.tar"
+    },
+    "1lvae-vanilla-resnet": {
+        "variable": None
+    }
 }
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--model_type', type=str, choices=["mbt", "cheng"], help="model type")
+parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1mvae-vanilla-resnet"], help="model type")
 parser.add_argument('--bitrate', type=float, help="Determines the model bitrate. Choices are 0.0035, 0.013, 0.0483, 0.1800")
 parser.add_argument('--save_path', type=str, default="model_zoo/", help="path to save the checkpoint")
 

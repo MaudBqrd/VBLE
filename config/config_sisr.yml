@@ -13,7 +13,7 @@
     "degraded_image_root": null,
 
     "n_bits": 8,
-    "n_samples": 1,  # number of images to restore. -1 to restore all dataset images
+    "n_samples": 3,  # number of images to restore. -1 to restore all dataset images
 
     # --------- INVERSE PROBLEM SETTINGS ---------
 
@@ -34,18 +34,18 @@
 
     # --------- MODEL LOADING ---------
 
-    "model": "../compressai/model_zoo/mbt_0.0067_bsd.pth.tar",  # path to model checkpoint
-    "model_type": "mbt",  # CAE models: 'mbt', 'cheng'
+    "model": null,  # path to model checkpoint
+    "model_type": null,  # CAE models: 'mbt', 'cheng'
 
     # --------- REGULARIZATION PARAMETERS ---------
 
-    "lamb": 10,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
+    "lamb": 2.3,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
     "save_all_estimates": true,  # True to save all estimates for VBLE algo (in particular, z and a to do additional posterior sampling)
 
     # --------- OPTIMIZATION PARAMETERS ---------
 
     "lr": 0.1,  # learning rate
-    "max_iters": 200,  # number of iterations
+    "max_iters": 300,  # number of iterations
     "datafit_loss_type": "ll",
     "optimizer_name": "adam",  # adam or sgd
     "n_samples_sgvb": 1,  # Number of samples for computing the SGVB estimate at each iteration. If instability during VBLE optimization, increase this number

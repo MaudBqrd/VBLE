@@ -81,7 +81,6 @@ def vble(y: torch.Tensor, datafit_loss, priornet: nn.Module, zdim, lamb: float =
         k += 1
 
         optimizer.zero_grad()
-
         # loss computation + backward
         datafit, kl_z = ir_loss(inference_params, y, datafit_loss, priornet, n_samples_sgvb=n_samples_sgvb)
         loss = datafit + lamb*kl_z

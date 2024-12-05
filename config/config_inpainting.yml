@@ -39,7 +39,7 @@
 
     # --------- REGULARIZATION PARAMETERS ---------
 
-    "lamb": 0.6,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
+    "lamb": 4.5,  # Regularization param in L(z) = ||AD(z) - y ||² + lambda R(z)
     "save_all_estimates": true,  # True to save all estimates for VBLE algo (in particular, z and a to do additional posterior sampling)
 
     # --------- OPTIMIZATION PARAMETERS ---------

@@ -3,7 +3,8 @@ from abc import ABC
 import torch.nn as nn
 import numpy as np
 
-from cae import CompressAICAE
+from cae.cae_models import CompressAICAE
+from vae.vae_models import vae_models, vae_config
 
 from.prior_nn_utils import get_latent_sampling_fn
 
@@ -13,6 +14,8 @@ def get_priornn_module(model_path: str, model_type: str, device: str, in_channel
     """
     if "mbt" in model_type or "cheng" in model_type:
         return CAEPriorNN(model_path, model_type, device, in_channels, latent_inference_model, optimize_h)
+    elif "vae" in model_type:
+        return VAEPriorNN(model_path, model_type, device, in_channels, latent_inference_model)
     else:
         raise ValueError(f'Unknown model type {model_type}')
 
@@ -76,6 +79,11 @@ class PriorNN(ABC):
         """
         if model_type in ["mbt", "cheng"]:
             net = CompressAICAE(model_path, model_type, device, n_channels)
+        elif '1lvae' in model_type:
+            ckpt = torch.load(model_path, map_location=device)
+            net = vae_models[model_type].instantiate(in_channels=n_channels, gamma=ckpt['config']['gamma'], learn_top_prior=False, default_params=vae_config[model_type])
+            net.load_state_dict(ckpt["state_dict"])
+            net.eval()
         else:
             raise NotImplementedError
 
@@ -131,8 +139,6 @@ class CAEPriorNN(PriorNN):
         """
         Sample x \sim q(x|z)q(z). If sampling is False, return the center of the distribution
         """
-
-        inference_params_name = inference_params.get_param_names()
 
         # Sampling of z
         z_bar = inference_params.get_zbar()
@@ -216,3 +222,77 @@ class CAEPriorNN(PriorNN):
             return kl_z
         else:
             raise NotImplementedError
+
+
+class VAEPriorNN(PriorNN):
+    """
+    Class wrapping the VAE regularizer
+    """
+
+    def __init__(self, model_path: str, model_type: str, device: str = 'cuda', in_channels: int = 1,
+                 latent_inference_model: str = 'uniform'):
+        super().__init__(model_path, model_type, device, in_channels, latent_inference_model, optimize_h=False)
+
+        self.net = PriorNN.load_prior_model(model_path, model_type, device, in_channels)
+        assert latent_inference_model in ["gaussian", "dirac"], f"Latent inference model {latent_inference_model} not supported for VAE"
+
+
+
+    def sample_vble_model(self, inference_params: nn.Module, sampling: bool = False, n_samples: int = 1):
+        """
+        Sample x \sim q(x|z)q(z). If sampling is False, return the center of the distribution
+        """
+        # Sampling of z
+        z_bar = inference_params.get_zbar()
+        if sampling:
+            z = z_bar.expand((n_samples,*([-1]*(len(z_bar.shape)-1))))
+            z = z + self.latent_sampling_fn(z.size(), inference_params.get_az())
+        else:
+            z = z_bar
+        
+        # Decoding z and computing p(x|z)
+        out_dict = self.net.decoder(z)
+        out_dict.update({"z": z, "z_bar": z_bar})
+        return out_dict
+
+    def net_encoder(self, x: torch.Tensor, posterior_sampling: bool = False):
+        """
+        Encoder network
+        """
+        out_encoder = self.net.encoder(x)
+        if posterior_sampling:
+            z = self.net.posterior_sample(out_encoder)
+        else:
+            z = out_encoder["mu_z"]
+        out_encoder.update({"z": z})
+        return out_encoder
+    
+    def net_decoder(self, out_encoder: dict):
+        """
+        Decoder network
+        """
+        out_decoder = self.net.decoder(out_encoder["z"])
+        return out_decoder
+
+
+    def compute_kl_z(self, inference_params: nn.Module, out_vble_sampling: dict):
+        """
+        Compute KL(q(z)||p_\theta(z)): 
+        Accepted latent_inference_model: dirac : approximate KL with Monte Carlo
+                                         gaussian : KL between two gaussians
+        """
+        _, _, H, W = out_vble_sampling["x_rec"].size()
+        num_pixels = H * W
+        n_latent_sample = out_vble_sampling["z"].size(0)
+
+        prior_scale = self.net.get_prior_scale().to(out_vble_sampling["z"].device).expand(inference_params.get_zbar().shape)
+        if len(out_vble_sampling["z"].shape) > 2:  # fully convolutionnal bottleneck
+            out_vble_sampling["z"] = out_vble_sampling["z"].expand((out_vble_sampling["z"].shape[0], -1, *out_vble_sampling["z"].shape[2:]))
+        if self.latent_inference_model == "dirac":  # 0.5||z||^2
+            kl_z = 0.5 * torch.sum((out_vble_sampling["z"] / prior_scale.to(out_vble_sampling["z"].device)).pow(2)) / (num_pixels * n_latent_sample)
+        elif self.latent_inference_model == "gaussian": # KL(q(z)||p(z)) between two gaussians
+            a = inference_params.get_az()
+            kl_z = 0.5 * torch.sum((a.pow(2) + inference_params.get_zbar().pow(2)) / prior_scale.pow(2) + 2 * torch.log(prior_scale) - 2 * torch.log(a) -1) / num_pixels
+        else:
+            raise NotImplementedError
+        return kl_z

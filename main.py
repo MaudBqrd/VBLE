@@ -49,7 +49,7 @@ parser.add_argument('--proba_missing', type=float, default=0.5)
 
 # Model settings
 parser.add_argument('--model', type=str, help="path to model checkpoint")
-parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1lvae-vanilla-fcb"], help="model type")
+parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1lvae-vanilla-fcb", "1lvae-vanilla-resnet"], help="model type")
 
 # Optimization parameters
 parser.add_argument('--lamb', type=float, default=1, help="Regularization parameter. Lambda=1 correpsonds to the Bayesian framework")

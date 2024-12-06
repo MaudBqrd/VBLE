@@ -58,15 +58,15 @@ model_urls = {
         "variable": f"{root_url}/q2T4BMwCGzR34yj/download/1lvae-vanilla_celeba_gammavariable.pth.tar"
     },
     "1lvae-vanilla-resnet": {
-        "variable": None
+        "variable": f"{root_url}/FC9Tw242P4K6f49/download/1lvae-vanilla-resnet_celeba_gammavariable.pth.tar"
     }
 }
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1mvae-vanilla-resnet"], help="model type")
+parser.add_argument('--model_type', type=str, choices=["mbt", "cheng", "1lvae-vanilla", "1lvae-vanilla-resnet"], help="model type")
 parser.add_argument('--bitrate', type=str, help="Determines the model bitrate. Choices are 0.0035, 0.013, 0.0483, 0.1800")
-parser.add_argument('--save_path', type=str, default="model_zoo/", help="path to save the checkpoint")
+parser.add_argument('--save_path', type=str, default=None, help="path to save the checkpoint")
 
 args = parser.parse_args()
 
@@ -75,6 +75,9 @@ if "1lvae" in args.model_type:
 else:
     url = model_urls[args.model_type]["mse"][args.bitrate]
 state_dict = load_state_dict_from_url(url, progress=True)
+
+if args.save_path is None:
+    args.save_path = f"model_zoo/{os.path.basename(url)}"
 
 if not os.path.exists(os.path.dirname(args.save_path)):
     os.makedirs(os.path.dirname(args.save_path))

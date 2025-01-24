@@ -1,6 +1,6 @@
 # Variational Bayes Image Restoration with compressive autoencoders
 
-This repo contains the code associated with the paper "Variational Bayes Image Restoration with compressive autoencoders".
+This repo contains the code associated with the paper "Variational Bayes Image Restoration with compressive autoencoders" [1].
 
 It provides the implementation of Variational Bayes Latent Estimation (VBLE) algorithm in PyTorch for image restoration, as well as training scripts and pretrained 
 - compressive autoencoders (CAEs) on BSD,
@@ -15,6 +15,7 @@ Developed under Python=3.9, PyTorch=1.12.1.
 cd VBLE/
 pip install -r requirements.txt  # environment setup
 ```
+CompressAI package requires a C++17 compiler. If CompressAI installation fails, see [CompressAI page](https://interdigitalinc.github.io/CompressAI/installation.html).
 
 ## Model download
 
@@ -75,6 +76,14 @@ $\lambda=1$ corresponds to the theoretical Bayesian value, and should work fine 
 |  mbt  | $\alpha$  |          0.0483          |        0.0067         | 0.025  |          0.0067          |        0.0035         | 0.0067 |   0.025    |   0.0067   |       0.0932        |
 |       | $\lambda$ |           0.7            |         0.8           |  0.6   |           0.7            |         0.6           |  0.6   |    2.3     |    3.4     |         4.5         |
 
+|  FFHQ |           | Deblur $\sigma=2.55/255$ |                       |        | Deblur $\sigma=7.65/255$ |                       |        |    SISR    |            | Inpainting $\sigma=2.55/255$ |
+| :---: | :-------: | :----------------------: | :-------------------: | :----: | :----------------------: | :-------------------: | :----: |:----------:|:----------:| :-----------------: |
+|       |           |  Gaussian $\sigma_k=1$   | Gaussian $\sigma_k=3$ | Motion |  Gaussian $\sigma_k=1$   | Gaussian $\sigma_k=3$ | Motion | $\times 2$ | $\times 4$ |       $50 \%$       |
+| cheng | $\alpha$  |          0.1800          |        0.0067         | 0.0932 |          0.025          |        0.0035         | 0.025  |   0.025    |   0.013    |       0.1800        |
+|       | $\lambda$ |           0.8            |         2.7          |  1.0   |           1.0           |         1.8         |  0.9  |    4.0     |    4.6     |        2.0         |
+|  mbt  | $\alpha$  |          0.0932          |        0.0067         | 0.0483 |          0.013           |        0.0035         | 0.0067 |   0.0067   |   0.013    |       0.0932        |
+|       | $\lambda$ |           1.0            |         0.6           |  0.9   |           1.0           |         0.9          |  0.8  |    3.2     |   1.8     |         2.0         |
+*
 
 ## Training or finetuning your own compression model
 
@@ -119,3 +128,7 @@ python train.py -m 1lvae-vanilla-fcb --dataset-root $PATH_TO_TRAIN_DATASET --epo
 ```
 
 See ```python vae/train.py --help``` for further documentation and default training parameters.
+
+## References
+
+[1] Biquard Maud, Chabert Marie, Genin Florence, Latry Christophe, & Oberlin Thomas. Variational Bayes image restoration with compressive autoencoders. arXiv preprint arXiv:2311.17744.

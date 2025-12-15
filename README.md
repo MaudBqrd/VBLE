@@ -1,5 +1,11 @@
 # Variational Bayes Image Restoration with compressive autoencoders
 
+###############################
+
+**IMPORTANT: A new repo, with the improved VBLE-xz algorithm [2] is available following [this link](https://github.com/MaudBqrd/VBLExz), with more functionalities, more datasets et more models.**
+
+###############################
+
 This repo contains the code associated with the paper "Variational Bayes Image Restoration with compressive autoencoders" [1].
 
 It provides the implementation of Variational Bayes Latent Estimation (VBLE) algorithm in PyTorch for image restoration, as well as training scripts and pretrained 
@@ -131,4 +137,6 @@ See ```python vae/train.py --help``` for further documentation and default train
 
 ## References
 
-[1] Biquard Maud, Chabert Marie, Genin Florence, Latry Christophe, & Oberlin Thomas. Variational Bayes image restoration with compressive autoencoders. arXiv preprint arXiv:2311.17744.
+[1] Biquard Maud, Chabert Marie, Genin Florence, Latry Christophe, & Oberlin Thomas. Variational Bayes image restoration with compressive autoencoders. IEEE Transactions on Image Processing, 2025
+
+[2] Biquard Maud, Chabert Marie, Genin Florence, Latry Christophe, & Oberlin Thomas. Deep Priors for Satellite Image Restoration with Accurate Uncertainties. IEEE Transactions on Geoscience and Remote Sensing, 2025
